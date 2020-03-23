@@ -132,7 +132,7 @@ const authRouter = require("./routers/auth");
 app.use("/", authRouter);
 
 const homePagesRouter = require("./routers/homepages");
-console.log(homePagesRouter);
+console.log("HOMEPAGES", homePagesRouter);
 app.use("/homepages", homePagesRouter);
 
 // Listen for connections on specified port (default is port 4000)
