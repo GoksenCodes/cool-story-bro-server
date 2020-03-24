@@ -4,6 +4,8 @@ const { toJWT } = require("../auth/jwt");
 const authMiddleware = require("../auth/middleware");
 const User = require("../models/").user;
 const { SALT_ROUNDS } = require("../config/constants");
+const Homepage = require("../models/").homepage;
+const Story = require("../models").story;
 
 const router = new Router();
 
@@ -17,7 +19,13 @@ router.post("/login", async (req, res, next) => {
         .send({ message: "Please provide both email and password" });
     }
 
-    const user = await User.findOne({ where: { email } });
+    const user = await User.findOne({
+      where: { email },
+      include: {
+        model: Homepage,
+        include: [Story]
+      }
+    });
 
     if (!user || !bcrypt.compareSync(password, user.password)) {
       return res.status(400).send({
@@ -66,10 +74,32 @@ router.post("/signup", async (req, res) => {
 // The /me endpoint can be used to:
 // - get the users email & name using only their token
 // - checking if a token is (still) valid
+
+//we are expected to display user's hoempage when user login so in get me route we return user's homepage
+//req user grabs user, homepage grabs the one match with user id and include stories
+
 router.get("/me", authMiddleware, async (req, res) => {
+  const user = req.user;
+  const homepage = await Homepage.findOne({
+    where: { userId: user.id },
+    include: [Story]
+  });
   // don't send back the password hash
   delete req.user.dataValues["password"];
-  res.status(200).send({ ...req.user.dataValues });
+  res.status(200).send({ ...req.user.dataValues, homepage });
 });
+
+// I tested it like below to see if the route works and it works so next xtep is getting token
+// router.get("/me", async (req, res) => {
+//   const user = 1;
+//   const homepage = await Homepage.findOne({
+//     where: { userId: user },
+//     include: [Story]
+//   });
+//   console.log(homepage);
+//   // don't send back the password hash
+//   // delete req.user.dataValues["password"];
+//   res.send(homepage);
+// });
 
 module.exports = router;

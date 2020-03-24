@@ -141,3 +141,15 @@ const { PORT } = require("./config/constants");
 app.listen(PORT, () => {
   console.log(`Listening on port: ${PORT}`);
 });
+
+// router.get("/me", async (req, res) => {
+//   const user = 1;
+//   const homepage = await Homepage.findOne({
+//     where: { userId: user },
+//     include: [Story]
+//   });
+//   console.log(homepage);
+//   // don't send back the password hash
+//   // delete req.user.dataValues["password"];
+//   res.send(homepage);
+// });
