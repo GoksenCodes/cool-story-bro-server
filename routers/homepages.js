@@ -36,16 +36,50 @@ router.put("/:id", auth, async (req, res) => {
     return res.status(403).send({ message: "You are not authorized" });
   }
 
-  const { title, description, backgroundColor, color } = req.body;
+  const { title, description, backgroundcolor, color } = req.body;
 
-  await homepage.update({ title, description, backgroundColor, color });
+  await homepage.update({ title, description, backgroundcolor, color });
 
   return res.send({ homepage });
 });
 
-// async function getHomepageWithStory(id) {
-//   const result = await Homepage.findByPk(id, { include: [story] });
-//   return result.get({ plain: true });
-// }
+router.post("/:id/stories", auth, async (req, res, next) => {
+  const homepage = await Homepage.findByPk(req.params.id);
+  try {
+    const { name, content, imageurl } = req.body;
+    // console.log("YYYYYYY", { name, content, imageurl });
+    if (!name || !content) {
+      res.status(400).send("missing information");
+    } else {
+      const newStory = await Story.create({
+        name,
+        imageurl,
+        content,
+        homepageId: homepage.id
+      });
+      res.json(newStory);
+    }
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.delete("/:id/stories/:storyId", async (req, res, next) => {
+  // get the storyId from params
+  const { storyId } = req.params;
+  try {
+    // find the story
+    const story = await Story.findByPk(storyId);
+    //check if the story exists
+    if (!story) {
+      res.status(404).send("story not found");
+    } else {
+      const deletedStory = await story.destroy();
+      res.json({ storyId });
+    }
+  } catch (e) {
+    next(e);
+  }
+});
 
 module.exports = router;

@@ -59,7 +59,20 @@ router.post("/signup", async (req, res) => {
 
     const token = toJWT({ userId: newUser.id });
 
-    res.status(201).json({ token, ...newUser.dataValues });
+    // since we want to return homepage when user signup we define homepage here and add it to res.json response
+    const homepage = await Homepage.create({
+      title: `${newUser.name}'s page`,
+      userId: newUser.id
+    });
+
+    res.status(201).json({
+      token,
+      ...newUser.dataValues,
+      homepage: {
+        ...homepage.dataValues,
+        stories: []
+      }
+    });
   } catch (error) {
     if (error.name === "SequelizeUniqueConstraintError") {
       return res
