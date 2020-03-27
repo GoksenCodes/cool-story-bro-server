@@ -3,6 +3,7 @@ const auth = require("../auth/middleware");
 const Homepage = require("../models").homepage;
 const Story = require("../models").story;
 const User = require("../models").user;
+const Like = require("../models").like;
 
 const router = new Router();
 
@@ -50,7 +51,7 @@ router.put("/:id", auth, async (req, res) => {
   return res.send({ homepage });
 });
 
-router.post("/:id/stories", auth, async (req, res, next) => {
+router.post("/:storyId/stories", auth, async (req, res, next) => {
   const homepage = await Homepage.findByPk(req.params.id);
   try {
     const { name, content, imageurl } = req.body;
@@ -90,4 +91,21 @@ router.delete("/:id/stories/:storyId", async (req, res, next) => {
   }
 });
 
+//check if this  userId-storyId exist? which mean if the post is liked already.
+//if exists destroy the like if not create
+router.post("/:id/stories/:storyId/like", auth, async (req, res, next) => {
+  //Add a row to the likes table with storyId and userId
+  // we will get the story id from the path and user id from the auth middleware
+  const { storyId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const liked = await Like.create({ userId, storyId });
+    console.log(req);
+    console.log("is the post liked?", liked);
+    res.json(liked);
+  } catch (e) {
+    next(e);
+  }
+});
 module.exports = router;
