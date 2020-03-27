@@ -2,6 +2,7 @@ const { Router } = require("express");
 const auth = require("../auth/middleware");
 const Homepage = require("../models").homepage;
 const Story = require("../models").story;
+const User = require("../models").user;
 
 const router = new Router();
 
@@ -19,7 +20,13 @@ router.get("/:id", async (req, res, next) => {
   console.log(req.params); //once id yi alamadim. o yuzden req params a ve id ye baktik.
 
   try {
-    const homepage = await Homepage.findByPk(homepageId, { include: [Story] });
+    const homepage = await Homepage.findByPk(homepageId, {
+      //{ include: [Story] });  WE WILL MODIFY THIS TO GET STORIES WITH USER ID AND NAME FOR LIKE FEATURE
+
+      include: [
+        { model: Story, include: [{ model: User, attributes: ["id", "name"] }] }
+      ]
+    });
     if (!homepage) {
       res.status(404).send("No homepage found");
     } else {
@@ -64,6 +71,7 @@ router.post("/:id/stories", auth, async (req, res, next) => {
   }
 });
 
+//this is spesific method of delete in sequelize
 router.delete("/:id/stories/:storyId", async (req, res, next) => {
   // get the storyId from params
   const { storyId } = req.params;

@@ -95,7 +95,10 @@ router.get("/me", authMiddleware, async (req, res) => {
   const user = req.user;
   const homepage = await Homepage.findOne({
     where: { userId: user.id },
-    include: [Story]
+    // include: [Story] we will modify this part so we can get user id and user name through story and user model
+    include: [
+      { model: Story, include: [{ model: User, attributes: ["id", "name"] }] }
+    ]
   });
   // don't send back the password hash
   delete req.user.dataValues["password"];

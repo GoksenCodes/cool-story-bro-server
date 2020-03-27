@@ -15,6 +15,10 @@ module.exports = (sequelize, DataTypes) => {
   story.associate = function(models) {
     // associations can be defined here
     story.belongsTo(models.homepage);
+    story.belongsToMany(models.user, {
+      through: "likes",
+      foreignKey: "storyId"
+    });
   };
   return story;
 };
